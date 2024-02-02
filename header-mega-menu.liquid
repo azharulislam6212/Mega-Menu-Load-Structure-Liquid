@@ -1,0 +1,348 @@
+
+// menu label
+                              {%- if  link.title  contains '['  or  link.title contains ']'-%}
+                                {% assign title = link.title | split: '[' | first %}
+                                {% assign label = link.title | split: '[' | last | remove: ']'  %}
+
+                                <a href="{{ link.url }}" class="nav-dropdown_link w-inline-block">
+                                  <div underline-transform="">{{ title }}</div>
+              
+                                  <div class="nav-dropdown_tag">
+                                    <div class="tag-text">{{label}}</div>
+                                  </div>
+                                </a>
+
+                                {%- else -%}
+                                <a underline-transform="" href="{{ link.url }}" class="nav-dropdown_link w-inline-block">
+                                  <div>{{ link.title }}</div>
+                                </a>
+                              {%- endif -%}
+
+
+
+mega menu drowpdow menu
+<nav class="header__inline-menu">
+    <ul role="list">
+       {%- for link in section.settings.menu.links -%}
+
+         {%- assign submenu = false -%}
+         {%- assign megamenu = false -%}
+   
+            {%- if link.links != blank -%}
+           {%- assign submenu = true -%}
+           {%- endif -%}
+
+        {%- for block in section.blocks -%}
+         {%- case block.type -%}
+         {%- when 'megamenu_main' -%}
+           {% assign link_title = block.settings.link_title | handleize %}
+           {% assign menu_title = link.title | handleize %}
+         {%- if link_title == menu_title -%}
+         {%- assign megamenu = true -%}
+         {%- endif -%}
+         {%- when 'megamenu_menu_list' -%}
+           {% assign link_title = block.settings.link_title | handleize %}
+           {% assign menu_title = link.title | handleize %}
+         {%- if link_title == menu_title -%}
+         {%- assign megamenu = true -%}
+         {%- endif -%}
+   
+        {%- when 'megamenu_image' -%}
+         {% assign link_title = block.settings.link_title | handleize %}
+         {% assign menu_title = link.title | handleize %}
+           {%- if link_title == menu_title -%}
+           {%- assign megamenu = true -%}
+           {%- endif -%}
+         {%- endcase -%}
+         {%- endfor -%}
+
+
+            {%- if megamenu -%}
+
+               <li class="has-dropdown has-mega-menu">
+                  <a href="{{ link.url }}"  {% if link.current %} class="active" {% endif %}>{{ link.title | escape }}  <span class="arrow-down"> {%- render 'icon' with 'chevron-down' , width: '14', height: '14' -%}</span></a>
+                 
+                  {% assign count = 1 %}
+                  {%- for block in section.blocks -%}
+                    {%- case block.type -%}
+                    {%- when 'megamenu_main' -%}
+                      {% assign link_title = block.settings.link_title | handleize %}
+                      {% assign menu_title = link.title | handleize %}
+      
+                      {%- if link_title == menu_title -%}
+                        {% if count == 1 %}
+                          {%- render 'megamenu-main', block: block , link: link -%}
+                        {% endif %}
+                         {% assign count = count | plus: 1 %}
+                      {%- endif -%}
+      
+                    {%- when 'megamenu_menu_list' -%}
+                      {% assign link_title = block.settings.link_title | handleize %}
+                      {% assign menu_title = link.title | handleize %}
+                    {%- if link_title == menu_title  -%}
+                      {% if count == 1 %}
+                        {%- render 'megamenu-menu-list', block: block , link: link -%}
+                      {% endif %}
+                       {% assign count = count | plus: 1 %}
+                    {%- endif -%}
+      
+            
+                    {%- when 'megamenu_image' -%}
+                      {% assign link_title = block.settings.link_title | handleize %}
+                      {% assign menu_title = link.title | handleize %}
+      
+                      {%- if link_title == menu_title -%}
+                        {% if count == 1 %}
+                          {%- render 'megamenu-image', block: block , link: link -%}
+                        {% endif %}
+                         {% assign count = count | plus: 1 %}
+                     {%- endif -%}
+          
+                    {%- endcase -%}
+                    {%- endfor -%}
+
+              </li>
+
+            {% elsif submenu %}
+
+            <li class="has-dropdown">
+               <a href="{{ link.url }}"  {% if link.current %} class="active" {% endif %}>{{ link.title | escape }}  <span class="arrow-down"> {%- render 'icon' with 'chevron-down' , width: '14', height: '14' -%}</span></a>
+               <ul class="header__inline-submenu" role="list">
+                  {%- for childlink in link.links -%}
+                  {%- if childlink.links != blank -%}
+                     <li class="menu-item-has-children">
+                        <a href="blog-grid.html">{{ childlink.title | escape }}  <span class="sub-arrow-down"> {%- render 'icon' with 'chevron-down' , width: '14', height: '14' -%}</span></a>
+                        <ul class="header__inline-nested-menu" role="list">
+                           {%- for grandchild in childlink.links -%}
+                           <li><a href="{{ grandchild.url }}">{{ grandchild.title | escape }}</a></li>
+                        {%- endfor -%}
+                        </ul>
+                     </li>
+                     {%- else -%}
+                     <li><a href="{{ childlink.url }}">{{ childlink.title | escape }}</a></li>
+                  {%- endif -%}
+               {%- endfor -%}
+               </ul>
+            </li>
+
+            {%- else -%}
+              <li><a href=""{{ link.url }}"  {% if link.current %} class="active" {% endif %}>{{ link.title | escape }}</a></li>
+            {%- endif -%} 
+      {%- endfor -%}
+    </ul>
+ </nav>
+
+
+
+
+
+                 
+{% schema %}
+{
+  "name": "t:sections.header.name",
+  "class": "section-header",
+  "settings": [
+   
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "megamenu_image",
+      "name": "Megamenu (Image Blocks)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "link_title",
+          "label": "Mega menu trigger",
+          "info": "Enter the name of the menu item you'd like to apply a mega menu."
+        },
+        {
+          "type": "header",
+          "content": "Block Image First"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_promtion_1",
+          "default": true,
+          "label": "Enable Promotion"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "btn_label_1",
+          "label": "Button Label",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "url",
+          "id": "btn_link_1",
+          "label": "Button Link"
+        },
+        {
+          "type": "header",
+          "content": "Block Image Second"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_promtion_2",
+          "default": true,
+          "label": "Enable Promotion"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "btn_label_2",
+          "label": "Button Label",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "url",
+          "id": "btn_link_2",
+          "label": "Button Link"
+        },
+        {
+          "type": "header",
+          "content": "Block Image Third"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_promtion_3",
+          "default": true,
+          "label": "Enable Promotion"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_3",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "btn_label_3",
+          "label": "Button Label",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "url",
+          "id": "btn_link_3",
+          "label": "Button Link"
+        },
+        {
+          "type": "header",
+          "content": "Block Image Fourth"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_promtion_4",
+          "default": true,
+          "label": "Enable Promotion"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_4",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "btn_label_4",
+          "label": "Button Label",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "url",
+          "id": "btn_link_4",
+          "label": "Button Link"
+        },
+        {
+          "type": "header",
+          "content": "Block Image Fifth"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_promtion_5",
+          "default": true,
+          "label": "Enable Promotion"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_5",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "btn_label_5",
+          "label": "Button Label",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "url",
+          "id": "btn_link_5",
+          "label": "Button Link"
+        }
+      ]
+    },
+    {
+      "type": "megamenu_menu_list",
+      "name": "Megamenu (Menu List)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "link_title",
+          "label": "Mega menu trigger",
+          "info": "Enter the name of the menu item you'd like to apply a mega menu."
+        }
+      ]
+    },
+    {
+      "type": "megamenu_main",
+      "name": "Megamenu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "link_title",
+          "label": "Mega menu trigger",
+          "info": "Enter the name of the menu item you'd like to apply a mega menu."
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_promtion",
+          "default": true,
+          "label": "Enable Promotion"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "btn_label",
+          "label": "Button Label",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "url",
+          "id": "btn_link",
+          "label": "Button Link"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+
+
+
+
+
+                 
